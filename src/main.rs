@@ -206,8 +206,7 @@ fn draw_block(renderer: &mut sdl2::render::Renderer, block: &Block) {
 
 fn draw_grid(renderer: &mut sdl2::render::Renderer, grid: &Vec<Tile>) {
     renderer.set_draw_color(Color::RGB(0, 0, 0));
-    renderer.fill_rect(Rect::new(0, 0, //x*TILE_SIZE, y*TILE_SIZE,
-                                 10*TILE_SIZE as u32, 20*TILE_SIZE as u32)).ok();
+    renderer.fill_rect(Rect::new(0, 0, 10*TILE_SIZE as u32, 20*TILE_SIZE as u32)).ok();
     for (i, &tile) in grid.iter().enumerate() {
         match tile {
             Tile::Empty => continue,
@@ -234,9 +233,22 @@ fn random_block<'a>() -> Block<'a> {
     }
 }
 
+fn draw_text(renderer: &mut sdl2::render::Renderer, font: &sdl2::ttf::Font,
+             text: &str, x: i32, y: i32) {
+    let surface = font.render(text).blended(Color::RGB(255, 255, 255)).ok().unwrap();
+    let tex = renderer.create_texture_from_surface(&surface).ok().unwrap();
+    let src = Rect::new(0, 0, surface.width(), surface.height());
+    let dst = Rect::new(x, y, surface.width(), surface.height());
+    renderer.copy(&tex, Some(src), Some(dst)).ok();
+}
+
 
 fn main() {
     let context = sdl2::init().unwrap();
+    let ttf = sdl2::ttf::init().unwrap();
+    let font_path = std::path::Path::new("arial.ttf");
+    let font = ttf.load_font(font_path, 24).expect("Font not found.");
+
     let video = context.video().unwrap();
     let window = video.window("Tetris", 800, 600)
         .position_centered()
@@ -316,6 +328,8 @@ fn main() {
         draw_grid(&mut renderer, &grid);
         draw_block(&mut renderer, &block);
         draw_block(&mut renderer, &preview);
+        let score_str = format!("Score: {}", score);
+        draw_text(&mut renderer, &font, &score_str, 600, 400);
         renderer.present();
 
         let delta = frame_time.elapsed().subsec_nanos() / 1_000_000;

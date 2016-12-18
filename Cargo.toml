@@ -4,5 +4,9 @@ version = "0.1.0"
 authors = ["Juho Sepänmaa <sepanmaa@cs.helsinki.fi>"]
 
 [dependencies]
-sdl2 = "0.25"
 rand = "0.3"
+
+[dependencies.sdl2]
+version = "0.27"
+default-features = false
+features = ["ttf"]
